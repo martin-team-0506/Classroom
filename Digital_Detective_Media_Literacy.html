@@ -37,6 +37,22 @@ html.large{font-size:20px}body.projector .layout{display:block}body.projector .s
 #ethics .ethics-reflection{border:1px solid #b9cdbb;border-radius:12px;padding:.8rem 1rem;background:var(--paper)}#ethics .ethics-reflection summary{cursor:pointer;font-weight:750;line-height:1.7}#ethics .ethics-reflection p{line-height:1.8;margin:.75rem 0 0}#ethics .ethics-slide-copy{padding:.8rem 0;border-bottom:1px solid var(--line)}#ethics .ethics-slide-copy:last-of-type{border-bottom:0}#ethics .ethics-slide-copy p{white-space:pre-line;line-height:1.8;margin:.55rem 0}
 
 #ethics .ethics-art{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin:.7rem 0 .3rem;background:#eaf2ec}
+
+#ethics .ethics-overview{grid-column:1/-1;border-top:4px solid #86a995;background:#edf4e9}#ethics .ethics-overview p{line-height:1.8}
+
+#media .topic-header [data-flip]{margin-inline-start:auto;flex:none;font-size:.85rem}
+#media details.reflection summary{cursor:pointer;font-weight:750;line-height:1.7}
+#media details.reflection p{margin:.75rem 0 0;line-height:1.8}
+#media .slide-copy{border-bottom:1px solid var(--line);padding:.85rem 0}
+#media .slide-copy:last-child{border-bottom:0}
+#media .slide-copy p{white-space:pre-line;line-height:1.8;overflow-wrap:anywhere}
+
+#media .media-accordion{margin:.65rem 0;padding:0;border:1px solid #b9cdbb;border-radius:12px;background:var(--paper);overflow:hidden}
+#media .media-accordion>summary{padding:.85rem 1rem;font-weight:750;line-height:1.7;cursor:pointer;overflow-wrap:anywhere}
+#media .media-accordion[open]>summary{background:#e1ecdf;border-bottom:1px solid #b9cdbb}
+#media .media-accordion-body{padding:.85rem 1rem 1rem}
+#media .media-accordion-body p{white-space:pre-line;line-height:1.8;overflow-wrap:anywhere;margin:0 0 .65rem}
+#media .media-accordion-body p:last-child{margin-bottom:0}
 </style>
 </head>
 <body>
@@ -284,16 +300,113 @@ const ethicsAnswers = [
   '不能只因為搜尋得到就直接公開使用。應查看圖片的授權條件，確認是否允許重製、改作或公開分享，並依規定標示作者與來源；不確定時，先取得許可或改用自己製作、有合適授權的圖片。',
   '可以採用適合手機閱讀的版面、壓縮圖片、提供文字版與可下載教材，讓影片有字幕並可選擇較低畫質。避免一定要用電腦或高速網路才能完成，也提供替代的學習與繳交方式。'
 ];
+function ethicsAccordionBack(index) {
+  const deck = slides[0];
+  const groups = index === 0 ? [
+    ['尊重他人、謹慎發言', 49],
+    ['用字精準正確', 50],
+    ['不隨意轉發訊息', 51]
+  ] : [
+    ['想一想，你還知道哪些新的產品或服務，曾因法律來不及制定、缺乏管理而造成社會問題？', 54],
+    ['想一想，如果沒有適用的法律，我們應該如何維護社會的秩序？', 55]
+  ];
+  const intro = index === 1 ? `<div class="ethics-slide-copy">${slideParagraphs(deck[52], deck[52].text.filter(line => !/^\d+$/.test(line)))}</div>` : '';
+  return intro + groups.map(([title, page]) => {
+    const slide = deck[page - 1];
+    const paragraphs = slide.text.filter(line => !/^\d+$/.test(line) && line !== slide.title).map(line => line.startsWith(title) ? line.slice(title.length).replace(/^[：:]?\n?/, '') : line).filter(Boolean);
+    return `<details class="reflection ethics-reflection"><summary>${esc(title)}</summary><div class="ethics-slide-copy">${slideParagraphs(slide, paragraphs)}</div></details>`;
+  }).join('');
+}
+function ethicsOverview() {
+  return `<section class="panel ethics-overview"><h2>資訊倫理的四大議題</h2><p>倫理道德是社會公認的規範，可作為衡量行為是否正當的標準，但倫理道德不像法律具有強制性。</p><p>不論是否有法律的約束，都應該遵守倫理道德的規範。</p><p>美國學者理查德．梅森針對資訊科技的使用行為，提出了資訊倫理的四大議題，稱為PAPA理論。</p></section>`;
+}
+function papaBack(index) {
+  const deck = slides[0];
+  const clean = lines => lines.filter(line => !/^\d+$/.test(line));
+  const answer = page => clean(deck[page - 1].text.slice(3));
+  const concept = (page, heading) => clean(deck[page - 1].text).filter(line => line !== heading);
+  const groups = {
+    2: [
+      ['PAPA理論－Privacy 資訊隱私權', [...concept(57, 'PAPA理論－Privacy 資訊隱私權'), ...clean(deck[57].text)]],
+      ['【想一想】哪些行為會侵害別人的隱私？', answer(59)],
+      ['【想一想】如何保護自己的隱私？', answer(60)]
+    ],
+    3: [
+      ['PAPA理論－Accuracy 資訊準確性', concept(61, 'PAPA理論－Accuracy 資訊準確性')],
+      ['【想一想】接收到資訊時，要怎麼做才能不受錯誤訊息的危害？', [deck[61].text[5]]],
+      ['【想一想】捏造並散布錯誤資訊，是否要負法律責任？', [deck[61].text[6]]]
+    ],
+    4: [
+      ['PAPA理論－Property 資訊所有權', concept(63, 'PAPA理論－Property 資訊所有權')],
+      ['【想一想】哪些行為會侵害他人的資訊所有權？', answer(64)],
+      ['【想一想】侵害別人的資訊所有權，是否會受到法律制裁？', answer(65)]
+    ],
+    5: [
+      ['PAPA理論－Accessibility資訊可及性', concept(66, 'PAPA理論－Accessibility資訊可及性')],
+      ['【想一想】偏鄉地區與都市地區使用資訊的便利性是否平等？', answer(67)],
+      ['【想一想】如果你是政府官員，要如何改善各地的資訊可及性？', answer(68)]
+    ]
+  };
+  return groups[index].map(([title, paragraphs]) => `<details class="reflection ethics-reflection"><summary>${esc(title)}</summary><div class="ethics-slide-copy">${slideParagraphs({links:[]}, paragraphs)}</div></details>`).join('');
+}
 function ethicsBackText(chapter, from, to) {
   return slides[chapter.deck].slice(from - 1, to).map(slide => {
     const paragraphs = slide.text.filter(line => !/^\d+$/.test(line));
     return `<section class="ethics-slide-copy">${slideParagraphs(slide, paragraphs)}</section>`;
   }).join('');
 }
+function mediaAccordionBack(index) {
+  const groups = [
+    [
+      ['常見的媒體', [3]],
+      ['媒體基本認識：訊息可能基於某些目的而被建構出來', [4]],
+      ['媒體基本認識：媒體傳遞的訊息不一定正確', [5]]
+    ],
+    [
+      ['【想一想】你或家人曾經因為新聞報導或電視節目的介紹，做過什麼消費嗎？', [7]],
+      ['【想一想】住家周圍是否有未經媒體渲染，就已經人氣旺盛的店家呢？', [8]],
+      ['「節目廣告化」、「廣告節目化」', [9]]
+    ],
+    [
+      ['【想一想】同一場抗議活動，為什麼在不同的新聞頻道中，會呈現出完全不同的觀點？', [11]],
+      ['【想一想】這兩則不同的報導，可能分別想傳達什麼事情？', [12, 13]],
+      ['訊息製造者的不同立場', [14, 15, 16]]
+    ],
+    [
+      ['【想一想】你是否接收過網路謠言？該如何判斷訊息的正確性？', [18]],
+      ['【想一想】誤信網路謠言，可能對我們造成什麼影響？', [19]],
+      ['常見的網路謠言類型', [20, 21]],
+      ['【食品安全衛生管理法第46-1條】', [22]],
+      ['政府機關闢謠專區', [23]]
+    ],
+    [
+      ['【想一想】看到類似的訊息時，應如何判斷真偽呢？', [25]],
+      ['【想一想】當生活周遭充斥著各種假訊息，可能帶來什麼影響？', [26]],
+      ['【想一想】影片的創作應受到哪些道德或法律的規範？', [27]],
+      ['自媒體的興起', [28, 29]],
+      ['相關法律條文', [30, 31]]
+    ]
+  ];
+  return groups[index].map(([title, pages]) => {
+    const body = pages.map(page => {
+      const slide = slides[1][page - 1];
+      let paragraphs = slide.text.filter(line => !/^\d+$/.test(line));
+      if (paragraphs.includes('【想一想】')) {
+        const questionIndex = paragraphs.findIndex(line => /^\d+\.\s*/.test(line));
+        paragraphs = paragraphs.slice(questionIndex + 1);
+      } else {
+        paragraphs = paragraphs.filter(line => line !== title && (line !== slide.title || /^【/.test(title) || title === '相關法律條文'));
+      }
+      return slideParagraphs(slide, paragraphs) + (slide.notes ? '<p><strong>講者備註</strong>　' + esc(slide.notes) + '</p>' : '');
+    }).join('');
+    return `<details class="reflection media-accordion"><summary>${esc(title)}</summary><div class="media-accordion-body">${body}</div></details>`;
+  }).join('');
+}
 function topicTranscript(chapter, from, to) {
   return `<details class="transcript topic-transcript"><summary>展開本主題簡報文字</summary>${slides[chapter.deck].slice(from-1,to).map((item,i) => `<details><summary>第 ${from+i} 張｜${esc(item.title)}</summary><ul>${item.text.filter(t => !/^\d+$/.test(t)).map(t => '<li>' + esc(t) + '</li>').join('')}</ul>${item.notes ? '<p>講者備註　' + esc(item.notes) + '</p>' : ''}</details>`).join('')}</details>`;
 }
 const riskAnswers = ["我想先把手機放進抽屜，陪家人散步二十分鐘。回來再想想，聊天時有沒有更專心。", "先停止轉貼，私下問同學：「你還好嗎？要不要我陪你去找導師？」讓對方決定需要什麼幫忙。", "可以寫：「我週六中午到店，等了約四十分鐘才上餐。如果趕時間，可以先詢問候餐時間。」時間和親身經驗能幫助別人做決定。", "要求保密可能是想讓我避開家人的提醒。我可以拒絕單獨赴約，把對話告訴信任的大人，一起判斷。", "用平常就知道的電話打給朋友，或當面確認。即使訊息來自熟悉的帳號，也先別傳點數、密碼或驗證碼。", "同學可能感到難堪，影片被轉傳後也可能被誤認為真的。製作與公開分享前，都應先說明用途並取得本人同意。", "先確認軟體名稱和開發者，再到官方網站、可信的應用程式商店或學校提供的平台下載。需要免費工具時，可以請老師推薦有正式授權的替代軟體。"];
+const mediaAnswers = ["轉播通常呈現比賽過程，但受鏡頭與主播選擇影響；短影片可能只留下精彩片段，省略前因後果；社群貼文則常聚焦個人的觀點與感受。可以交叉比對完整賽事與不同來源，確認被省略的脈絡。", "先查看是否標示廣告、贊助、合作或商品連結，再確認推薦者有沒有說明測試方法、實測證據與產品限制。實測也可能同時是廣告；若未清楚揭露，應查詢其他獨立來源再判斷。", "讀者可能少知道另一方的訴求、事件的背景、現場其他人的經驗，以及可以核對的證據。可以比較不同媒體的報導，查找雙方說法與原始資料，再形成自己的判斷。", "先暫停轉發，檢查來源、發布日期、原始內容與證據，再搜尋可信來源或查核機構的說明。也可以先問老師或家人；還不能確認時，先不要轉傳。", "在直播標題、畫面與影片說明中清楚標示「劇情演出」「情境模擬」或「非真實事件」，並交代必要背景。標示應讓觀眾容易看見，剪成短影片分享時也要保留，避免被誤認為真實新聞。"];
 const casePages = {risk:[4,10,16,22,28,35,42],ethics:[null,53,57],media:[3,6,10,17,24],verify:[33,null,42]};
 $('lessons').innerHTML = chapters.map(c => `<section class="page" data-page="${c.id}" id="${c.id}">
   <div class="section-head"><p class="kicker">${c.deck === 0 ? '課文 1-1' : '課文 1-2'}</p><h1>${c.title}</h1><p>${c.desc}</p></div>
@@ -305,8 +418,11 @@ $('lessons').innerHTML = chapters.map(c => `<section class="page" data-page="${c
     if (c.id === 'risk') {
       return `<article class="panel topic flip-card" data-topic="risk-${i}"><div class="card-face"><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button class="primary" data-flip aria-controls="risk-back-${i}">翻到背面</button></div>${visual}<p>${summary}</p><details class="reflection"><summary>${prompt}</summary><p><strong>參考答案</strong>　${riskAnswers[i]}</p></details></div><div class="card-face card-back" id="risk-back-${i}" hidden><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button data-flip>翻回正面</button></div>${i === 0 ? firstRiskBack() : groupedRiskBack(i)}</div></article>`;
     }
+    if (c.id === 'media') {
+      return `<article class="panel topic flip-card" data-topic="media-${i}"><div class="card-face"><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${esc(title)}</h2><button class="primary" data-flip aria-controls="media-back-${i}">翻到背面</button></div>${visual}<p>${esc(summary)}</p><details class="reflection"><summary>${esc(prompt)}</summary><p><strong>參考答案</strong>　${esc(mediaAnswers[i])}</p></details></div><div class="card-face card-back" id="media-back-${i}" hidden><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${esc(title)}</h2><button data-flip>翻回正面</button></div>${mediaAccordionBack(i)}</div></article>`;
+    }
     if (c.id === 'ethics') {
-      return `<article class="panel topic flip-card" data-topic="${c.id}-${i}"><div class="card-face"><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button class="primary" data-flip aria-controls="ethics-back-${i}">翻到背面</button></div><img class="ethics-art" loading="lazy" width="1600" height="900" src="${ethicsIllustrations[i]}" alt="${esc(title)}：日式立體卡通主題插圖"><p>${summary}</p><details class="reflection ethics-reflection"><summary>${esc(prompt)}</summary><p><strong>參考答案</strong>　${esc(ethicsAnswers[i])}</p></details></div><div class="card-face card-back" id="ethics-back-${i}" hidden><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button data-flip>翻回正面</button></div>${ethicsBackText(c,from,to)}</div></article>`;
+      return `<article class="panel topic flip-card" data-topic="${c.id}-${i}"><div class="card-face"><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button class="primary" data-flip aria-controls="ethics-back-${i}">翻到背面</button></div><img class="ethics-art" loading="lazy" width="1600" height="900" src="${ethicsIllustrations[i]}" alt="${esc(title)}：日式立體卡通主題插圖"><p>${summary}</p><details class="reflection ethics-reflection"><summary>${esc(prompt)}</summary><p><strong>參考答案</strong>　${esc(ethicsAnswers[i])}</p></details></div><div class="card-face card-back" id="ethics-back-${i}" hidden><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2><button data-flip>翻回正面</button></div>${i < 2 ? ethicsAccordionBack(i) : papaBack(i)}</div></article>${i === 1 ? ethicsOverview() : ''}`;
     }
     return `<article class="panel topic" data-topic="${c.id}-${i}"><div class="topic-header"><span aria-hidden="true">${icon}</span><h2>${title}</h2></div>${visual}<p>${summary}</p><p class="reflection">${prompt}</p>${topicTranscript(c,from,to)}<div class="actions">${c.id === 'verify' && i === 1 ? '<a class="button" href="#lab">寫查核筆記</a>' : ''}<button class="mark" data-mark="${c.id}-${i}" aria-pressed="false">標記已讀</button></div></article>`;
   }).join('')}</div></section>`).join('');
